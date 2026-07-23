@@ -338,6 +338,18 @@ textarea{resize:vertical}
 .tip-box{background:linear-gradient(135deg,rgba(59,53,168,.06),rgba(139,58,143,.04));border:1px solid rgba(59,53,168,.2);border-radius:var(--rsm);padding:11px 14px;font-size:12.5px;color:var(--txt2);line-height:1.6;margin-top:6px}
 .tip-box strong{color:var(--p)}
 
+/* ── DIAGNÓSTICO DE ESTANCAMIENTO ── */
+.diag-collapsed{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.diag-txt{font-size:12.5px;color:var(--muted);max-width:420px}
+.q-step{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--p);margin-bottom:8px}
+.q-text{font-size:14.5px;font-weight:600;margin-bottom:14px;line-height:1.4}
+.diag-opt{display:block;width:100%;text-align:left;border:1.5px solid var(--bdr);border-radius:var(--rsm);padding:11px 14px;margin-bottom:8px;background:#fff;font-size:12.5px;color:var(--txt2);cursor:pointer;transition:all .15s;font-family:var(--f)}
+.diag-opt:hover{border-color:var(--p);background:var(--p3)}
+.diag-result{background:linear-gradient(135deg,rgba(59,53,168,.06),rgba(139,58,143,.04));border:1px solid rgba(59,53,168,.18);border-radius:var(--rsm);padding:16px}
+.diag-result-tag{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--p);margin-bottom:6px}
+.diag-result-title{font-size:15px;font-weight:800;margin-bottom:6px}
+.diag-result-desc{font-size:12.5px;color:var(--txt2);line-height:1.7;margin-bottom:12px}
+
 /* ── FOOTER ── */
 .ftr{margin-left:var(--sw);background:var(--grad);padding:28px 30px;text-align:center}
 .ftr-logo{width:52px;height:52px;border-radius:11px;object-fit:cover;margin:0 auto 14px;display:block}
@@ -493,6 +505,8 @@ textarea{resize:vertical}
     </div>
   </div>
 
+  <div id="diagCard" style="margin-bottom:18px"></div>
+
   <!-- PRÓXIMOS SEGUIMIENTOS -->
   <div class="card">
     <div class="card-hdr">
@@ -583,7 +597,7 @@ textarea{resize:vertical}
         <div id="h-sliders"></div>
       </div>
       <div class="card">
-        <div class="card-hdr"><div class="card-ttl"><div class="dot"></div>Soft Skills (1-10)</div><button class="btn btn-out btn-xs" onclick="addSkill('s')">+ Agregar</button></div>
+        <div class="card-hdr"><div class="card-ttl"><div class="dot"></div>Habilidades Interpersonales (1-10)</div><button class="btn btn-out btn-xs" onclick="addSkill('s')">+ Agregar</button></div>
         <div id="s-sliders"></div>
       </div>
     </div>
@@ -1068,6 +1082,36 @@ Necesito que:
 2. Armes mi guión de negociación: frase de apertura, cómo anclar el número, cómo responder a "¿cuál es tu expectativa?".
 3. Listes qué beneficios no salariales puedo negociar si el número no se mueve.
 4. Simules la conversación: vos sos el/la empleador/a y me hacés las objeciones típicas.` },
+  { title:'Mail de Agradecimiento Post-Entrevista', text:`Redactá un mail breve de agradecimiento para enviar dentro de las 24 horas después de una entrevista laboral.
+
+Contexto:
+- Puesto: {{ROL}}
+- Entrevistador/a: [NOMBRE Y ROL]
+- Algo puntual que charlamos y que quiero retomar: [INSERTAR — ej. un proyecto que mencionaron, un desafío del equipo]
+
+Tono: profesional, cálido, sin sonar desesperado/a.
+Extensión: máximo 120 palabras.
+
+El mail debe:
+• Agradecer el tiempo y la conversación
+• Retomar ese punto puntual para mostrar que escuché con atención
+• Reafirmar en una frase mi interés en el puesto, sin repetir todo el pitch
+• Cerrar dejando la puerta abierta para el siguiente paso, sin presionar tiempos` },
+  { title:'Seguimiento sin Respuesta', text:`Necesito escribir un mensaje de seguimiento porque no tuve novedades después de [postularme / tener una entrevista] hace [CANTIDAD] días.
+
+Contexto:
+- Puesto: {{ROL}}
+- Empresa: [INSERTAR]
+- Última interacción: [INSERTAR — ej. entrevista con RRHH, envío de CV, último mail]
+
+Tono: respetuoso, breve, sin sonar impaciente ni exigente.
+Extensión: máximo 80 palabras.
+
+El mensaje debe:
+• Recordar brevemente el contexto (sin sonar a reclamo)
+• Preguntar de forma simple si hay novedades sobre el proceso
+• Reafirmar el interés en una sola frase
+• No incluir disculpas innecesarias por "molestar"` },
   { title:'Foto de Perfil & Banner LinkedIn (Gemini/DALL-E)', text:`FOTO DE PERFIL:
 Headshot profesional de [SUBIR FOTO DE REFERENCIA], mirando a cámara con confianza y cercanía. Iluminación suave estilo "Rembrandt" muy sutil. Fondo de oficina moderna desenfocado (bokeh), tonos neutros y cálidos. Fotografía realista, alta resolución, sin retoque excesivo. Aspecto 4:5.
 
@@ -1143,6 +1187,7 @@ function loadS() {
   S.brand.posts = S.brand.posts||[];
   S.lastBackup = S.lastBackup||0;
   S.bkSnooze = S.bkSnooze||0;
+  S.diag = S.diag||{ step:null, scores:{}, result:null };
   // Migración: nuevos campos en postulaciones y contactos
   S.apps.forEach(a=>{ a.fuente=a.fuente||''; a.pa=a.pa||''; a.paf=a.paf||''; a.link=a.link||''; a.rem=a.rem||''; });
   [...S.netP,...S.netS].forEach(c=>{ c.uc=c.uc||''; c.st=c.st||''; });
@@ -1368,7 +1413,7 @@ function renderSliders(type, cid) {
 
 function addSkill(type) {
   openModal('Nueva competencia', `
-    <div class="fld"><label class="lbl">${type==='h'?'Hard skill':'Soft skill'}</label><input class="inp" id="nskName" placeholder="ej. ${type==='h'?'Power BI, SQL, Inglés C1':'Negociación, Empatía'}" maxlength="40"></div>
+    <div class="fld"><label class="lbl">${type==='h'?'Hard skill':'Habilidad interpersonal'}</label><input class="inp" id="nskName" placeholder="ej. ${type==='h'?'Power BI, SQL, Inglés C1':'Negociación, Empatía'}" maxlength="40"></div>
     <button class="btn btn-p" style="width:100%;justify-content:center" onclick="confirmSkill('${type}')">Agregar</button>
   `);
   setTimeout(()=>{
@@ -1918,6 +1963,108 @@ function updBrandKPIs() {
 }
 
 // ─── PROMPTS PERSONALIZABLES & RECURSOS ────────────────
+// ─── DIAGNÓSTICO DE ESTANCAMIENTO ──────────────────────
+const DIAG_Q = [
+  { q:'¿Cuántas postulaciones activas tenés en este momento (esperando respuesta)?',
+    opts:[ {l:'Menos de 5',cat:'volumen',sc:2}, {l:'Entre 5 y 15',cat:'volumen',sc:0}, {l:'Más de 15',cat:'volumen',sc:0} ] },
+  { q:'¿Cuándo fue la última vez que tuviste una respuesta (buena o mala) a una postulación?',
+    opts:[ {l:'Hace menos de una semana',cat:'visibilidad',sc:0}, {l:'Hace 2 a 4 semanas',cat:'visibilidad',sc:1}, {l:'Hace más de un mes',cat:'visibilidad',sc:2}, {l:'No suelo recibir respuestas',cat:'visibilidad',sc:2} ] },
+  { q:'¿Con cuántas personas de tu sector hablaste este mes (más allá de entrevistas formales)?',
+    opts:[ {l:'Ninguna',cat:'networking',sc:2}, {l:'1 o 2',cat:'networking',sc:1}, {l:'3 o más',cat:'networking',sc:0} ] },
+  { q:'Cuando llegás a una entrevista, ¿cómo te sentís preparado/a?',
+    opts:[ {l:'Muy preparado/a, tengo mis historias armadas',cat:'entrevistas',sc:0}, {l:'Más o menos, me trabo en algunas preguntas',cat:'entrevistas',sc:1}, {l:'Bastante inseguro/a, no tengo respuestas armadas',cat:'entrevistas',sc:2} ] },
+];
+const DIAG_RESULTS = {
+  visibilidad:{ title:'Visibilidad, no en volumen', mod:2, modName:'Auditoría de Perfil',
+    desc:'Estás postulando con frecuencia, pero las respuestas no llegan. Antes de mandar más CVs, conviene revisar si tu perfil está optimizado para pasar el primer filtro — CV, LinkedIn y match de keywords con las vacantes.' },
+  volumen:{ title:'Necesitás ampliar el frente de postulaciones', mod:4, modName:'Tracker & Analytics',
+    desc:'Tenés pocas búsquedas activas en curso. Sumá más vacantes por semana y diversificá canales — cuantas más puertas golpees, más chances de que una se abra.' },
+  networking:{ title:'El mercado oculto está sin explorar', mod:3, modName:'Mapa de Influencia',
+    desc:'La mayoría de las oportunidades reales no se publican. Sin conversaciones activas con tu red, dependés solo de lo que ves en los portales.' },
+  entrevistas:{ title:'La preparación para entrevistas es el freno', mod:5, modName:'Entrevistas',
+    desc:'Cuando llegás a la instancia de entrevista, la inseguridad juega en contra. Armá tus historias con el Método STAR antes de la próxima.' },
+};
+
+function diagRenderCard() {
+  const el = document.getElementById('diagCard'); if(!el) return;
+  const d = S.diag||{};
+  if(d.result) el.innerHTML = diagResultHTML(d.result);
+  else if(d.step!=null) el.innerHTML = diagQuestionHTML(d.step);
+  else el.innerHTML = diagCollapsedHTML();
+}
+
+function diagCollapsedHTML() {
+  return `<div class="card">
+    <div class="diag-collapsed">
+      <div>
+        <div class="card-ttl" style="margin-bottom:4px"><div class="dot"></div>¿Sentís que estás estancado/a?</div>
+        <div class="diag-txt">4 preguntas rápidas para detectar en qué frente de tu búsqueda conviene poner el foco esta semana.</div>
+      </div>
+      <button class="btn btn-out btn-sm" onclick="diagStart()">Hacer diagnóstico →</button>
+    </div>
+  </div>`;
+}
+
+function diagQuestionHTML(step) {
+  const q = DIAG_Q[step];
+  return `<div class="card">
+    <div class="card-hdr"><div class="card-ttl"><div class="dot"></div>Diagnóstico de Estancamiento</div></div>
+    <div class="q-step">Pregunta ${step+1} de ${DIAG_Q.length}</div>
+    <div class="q-text">${esc(q.q)}</div>
+    ${q.opts.map((o,i)=>`<button class="diag-opt" onclick="diagAnswer(${step},${i})">${esc(o.l)}</button>`).join('')}
+  </div>`;
+}
+
+function diagResultHTML(key) {
+  if(key==='ok') return `<div class="card">
+    <div class="card-hdr"><div class="card-ttl"><div class="dot"></div>Diagnóstico de Estancamiento</div></div>
+    <div class="diag-result">
+      <div class="diag-result-tag">Buenas noticias</div>
+      <div class="diag-result-title">No se detectó un cuello de botella claro</div>
+      <div class="diag-result-desc">Estás sosteniendo los 4 frentes (postulaciones, respuestas, networking y preparación) de forma pareja. Seguí con el ritmo actual y repetí este diagnóstico si algo cambia.</div>
+      <button class="btn btn-out btn-sm" onclick="diagReset()">Rehacer diagnóstico</button>
+    </div>
+  </div>`;
+  const r = DIAG_RESULTS[key];
+  return `<div class="card">
+    <div class="card-hdr"><div class="card-ttl"><div class="dot"></div>Diagnóstico de Estancamiento</div></div>
+    <div class="diag-result">
+      <div class="diag-result-tag">Tu cuello de botella parece estar en</div>
+      <div class="diag-result-title">${esc(r.title)}</div>
+      <div class="diag-result-desc">${esc(r.desc)}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-p btn-sm" onclick="goMod(${r.mod},document.querySelectorAll('.nb')[${r.mod}])">Ir a ${esc(r.modName)} →</button>
+        <button class="btn btn-out btn-sm" onclick="diagReset()">Rehacer diagnóstico</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function diagStart() {
+  S.diag = { step:0, scores:{visibilidad:0,volumen:0,networking:0,entrevistas:0}, result:null };
+  save(); diagRenderCard();
+}
+
+function diagAnswer(step, optIdx) {
+  const o = DIAG_Q[step].opts[optIdx];
+  S.diag.scores[o.cat] = (S.diag.scores[o.cat]||0) + o.sc;
+  if(step+1 < DIAG_Q.length) {
+    S.diag.step = step+1;
+  } else {
+    const order = ['visibilidad','networking','entrevistas','volumen'];
+    let best = 'ok', bestScore = 0;
+    order.forEach(cat => { if(S.diag.scores[cat] > bestScore) { bestScore = S.diag.scores[cat]; best = cat; } });
+    S.diag.result = best;
+    S.diag.step = null;
+  }
+  save(); diagRenderCard();
+}
+
+function diagReset() {
+  S.diag = { step:null, scores:{}, result:null };
+  save(); diagRenderCard();
+}
+
 function tokMap() {
   const a = S.adn||{}, b = S.brand||{};
   return {
@@ -2139,6 +2286,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
     document.getElementById('obName').addEventListener('keydown', e=>{ if(e.key==='Enter') doOnboard(); });
   }
   updateGreet();
+  diagRenderCard();
   renderEnLog();
   renderRituals();
   loadADN();
