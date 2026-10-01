@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -225,8 +226,15 @@ textarea{resize:vertical}
 .sb-rechazado{background:#fef2f2;color:#991b1b}
 .sb-archivado{background:#f5f5f5;color:#6b7280}
 .sb-aceptada{background:linear-gradient(135deg,rgba(5,150,105,.15),rgba(59,53,168,.1));color:#065f46;font-weight:700}
-.prio-h{background:rgba(220,38,38,.08);color:#b91c1c;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
-.prio-l{background:rgba(59,53,168,.06);color:#3b35a8;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
+/* Escala de prioridad en 4 niveles de intensidad (ver PRIO_LEVELS en JS) */
+.prio{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.prio-4{background:rgba(220,38,38,.10);color:#b91c1c}
+.prio-3{background:rgba(217,119,6,.10);color:#b45309}
+.prio-2{background:rgba(59,53,168,.07);color:#3b35a8}
+.prio-1{background:rgba(136,136,170,.12);color:#66667a}
+.prio-legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:10px}
+.prio-legend-item{background:#fff;border:1px solid var(--bdr);border-radius:var(--rsm);padding:8px 10px;font-size:11.5px;color:var(--txt2);line-height:1.45}
+.prio-legend-item .prio{margin-bottom:4px}
 
 /* ── FUNNEL ── */
 .funnel{display:flex;align-items:flex-end;gap:10px;padding:16px 0}
@@ -659,7 +667,14 @@ textarea{resize:vertical}
 
   <div class="card" style="margin-bottom:16px;background:linear-gradient(135deg,rgba(59,53,168,.04),rgba(139,58,143,.04));border-color:rgba(59,53,168,.2)">
     <div class="card-ttl" style="margin-bottom:8px"><div class="dot"></div>¿Cómo funciona la prioridad?</div>
-    <p style="font-size:12.5px;color:var(--txt2);line-height:1.7"><strong>Match IA (0-10)</strong> + <strong>Interés Personal (0-10)</strong> = <strong>Rating total (0-20)</strong>. Si el Rating es <strong>≥ 15</strong> → 🔥 <strong>ALTA PRIORIDAD</strong> (invertí tiempo real aquí). Si es < 15 → ❄️ <strong>BAJA PRIORIDAD</strong> (postulación pasiva o descartar).</p>
+    <p style="font-size:12.5px;color:var(--txt2);line-height:1.7"><strong>Match IA (0-10)</strong> + <strong>Interés Personal (0-10)</strong> = <strong>Rating total (0-20)</strong>. Según el rating, cada postulación cae en uno de cuatro niveles de intensidad:</p>
+    <div class="prio-legend">
+      <div class="prio-legend-item"><span class="prio prio-4">🔥 MÁXIMA · 17-20</span><br>Foco total: CV a medida, contacto interno y seguimiento activo.</div>
+      <div class="prio-legend-item"><span class="prio prio-3">⚡ ALTA · 13-16</span><br>Postulación cuidada, con carta o mensaje personalizado.</div>
+      <div class="prio-legend-item"><span class="prio prio-2">🌤️ MEDIA · 9-12</span><br>Postulación estándar, sin invertir demasiado tiempo.</div>
+      <div class="prio-legend-item"><span class="prio prio-1">❄️ BAJA · 0-8</span><br>Postulación pasiva o descartar.</div>
+    </div>
+    <p style="font-size:12px;color:var(--txt2);line-height:1.6;margin-top:10px"><strong>Regla de equilibrio:</strong> si tu interés es de 4 o menos, la prioridad no pasa de 🌤️ MEDIA aunque el match sea alto. En la tabla lo vas a ver marcado con ↓. Un buen match no alcanza si el puesto no te entusiasma.</p>
   </div>
 
   <!-- AGENDA DE SEGUIMIENTO -->
@@ -1156,6 +1171,26 @@ const RECURSOS_DATA = [
   ]},
 ];
 
+// ─── ESCALA DE PRIORIDAD ──────────────────────────────
+// Rating = Match IA (0-10) + Interés (0-10). Para ajustar los cortes, editar solo "min".
+const PRIO_LEVELS = [
+  { lvl:4, min:17, lbl:'MÁXIMA', ico:'🔥', range:'17-20' },
+  { lvl:3, min:13, lbl:'ALTA',   ico:'⚡', range:'13-16' },
+  { lvl:2, min:9,  lbl:'MEDIA',  ico:'🌤️', range:'9-12'  },
+  { lvl:1, min:0,  lbl:'BAJA',   ico:'❄️', range:'0-8'   }
+];
+// Regla de equilibrio: si el interés es bajo (<= PRIO_INTERES_MIN), la prioridad no supera MEDIA,
+// aunque el match sea alto. Invertir tiempo en algo que no interesa es el peor uso de energía.
+const PRIO_INTERES_MIN = 4;
+const PRIO_TOPE_INTERES_BAJO = 2; // nivel máximo permitido con interés bajo (2 = MEDIA)
+function getPrio(rating, interes){
+  let p = PRIO_LEVELS.find(x=>rating>=x.min) || PRIO_LEVELS[PRIO_LEVELS.length-1];
+  if (interes !== undefined && interes <= PRIO_INTERES_MIN && p.lvl > PRIO_TOPE_INTERES_BAJO) {
+    p = Object.assign({}, PRIO_LEVELS.find(x=>x.lvl===PRIO_TOPE_INTERES_BAJO), { capped:true });
+  }
+  return p;
+}
+
 const STATUS_LIST = ['Guardado','Postulado','Entrevista','Oferta','Rechazado','Archivado (falta info/tiempo)','Oferta Aceptada ✓'];
 const STATUS_CSS = {'Guardado':'sb-guardado','Postulado':'sb-postulado','Entrevista':'sb-entrevista','Oferta':'sb-oferta','Rechazado':'sb-rechazado','Archivado (falta info/tiempo)':'sb-archivado','Oferta Aceptada ✓':'sb-aceptada'};
 const CLOSED_STATUS = ['Rechazado','Archivado (falta info/tiempo)','Oferta Aceptada ✓'];
@@ -1644,7 +1679,7 @@ function renderApps() {
   tbody.innerHTML = filtered.map(app => {
     const ri = apps.indexOf(app);
     const match = parseInt(app.match||0), interes = parseInt(app.interes||0), rating = match+interes;
-    const hi = rating>=15;
+    const prio = getPrio(rating, interes);
     const due = app.paf && app.paf<=today && !CLOSED_STATUS.includes(app.status);
     return `<tr>
       <td><input class="ti" type="date" value="${esc(app.fecha||'')}" style="width:106px" oninput="updApp(${ri},'fecha',this.value)"></td>
@@ -1660,7 +1695,7 @@ function renderApps() {
       <td><select class="ts" onchange="updApp(${ri},'match',this.value);renderApps()">${[...Array(11)].map((_,n)=>`<option value="${n}" ${parseInt(app.match||0)===n?'selected':''}>${n}</option>`).join('')}</select></td>
       <td><select class="ts" onchange="updApp(${ri},'interes',this.value);renderApps()">${[...Array(11)].map((_,n)=>`<option value="${n}" ${parseInt(app.interes||0)===n?'selected':''}>${n}</option>`).join('')}</select></td>
       <td style="font-weight:800;color:var(--p)">${rating}</td>
-      <td>${hi?'<span class="prio-h">🔥 ALTA</span>':'<span class="prio-l">❄️ BAJA</span>'}</td>
+      <td><span class="prio prio-${prio.lvl}" title="${prio.capped?`Rating ${rating}/20, pero el interés es bajo (${interes}/10): la prioridad queda en MEDIA`:`Rating ${rating}/20 · ${prio.range}`}">${prio.ico} ${prio.lbl}${prio.capped?' ↓':''}</span></td>
       <td><input class="ti" placeholder="ej. USD 2.000 / $2,4M" value="${esc(app.rem||'')}" oninput="updApp(${ri},'rem',this.value)" style="min-width:110px"></td>
       <td><input class="ti" placeholder="ej. Mandar follow-up" value="${esc(app.pa||'')}" oninput="updApp(${ri},'pa',this.value);renderFU()" style="min-width:120px"></td>
       <td><input class="ti" type="date" value="${esc(app.paf||'')}" style="width:106px;${due?'color:var(--red);font-weight:700':''}" onchange="updApp(${ri},'paf',this.value);renderApps()"></td>
