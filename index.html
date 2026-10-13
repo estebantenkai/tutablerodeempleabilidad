@@ -1337,7 +1337,7 @@ function renderRituals() {
         ${r.done?'<svg width="9" height="7" viewBox="0 0 9 7" fill="none"><path d="M1 3.5L3.5 6L8 1" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}
       </div>
       <input class="ritual-edit-inp ${r.done?'done':''}" value="${esc(r.t)}" placeholder="Desafío personalizado..." onchange="editRitual(${i},this.value)" style="${r.done?'text-decoration:line-through;color:var(--muted)':''}">
-      <button class="skill-del" onclick="deleteRitual(${i})" title="Eliminar" aria-label="Eliminar ritual">×</button>
+      <button class="skill-del" onclick="askDel('este ritual',()=>deleteRitual(${i}))" title="Eliminar" aria-label="Eliminar ritual">×</button>
     </div>
   `).join('');
   const done = rits.filter(r=>r.done).length;
@@ -1441,7 +1441,7 @@ function renderSliders(type, cid) {
       <span class="skill-nm">${esc(sk.n)}</span>
       <input type="range" class="skill-sl" min="1" max="10" value="${sk.v}" oninput="updSkill('${type}',${i},this.value)" aria-label="${esc(sk.n)}">
       <span class="skill-val" id="${type}v${i}">${sk.v}</span>
-      <button class="skill-del" onclick="delSkill('${type}',${i})" title="Eliminar" aria-label="Eliminar competencia">×</button>
+      <button class="skill-del" onclick="askDel('esta competencia',()=>delSkill('${type}',${i}))" title="Eliminar" aria-label="Eliminar competencia">×</button>
     </div>
   `).join('');
 }
@@ -1582,7 +1582,7 @@ function renderNet(type) {
       <select class="net-sel" onchange="updContact('${type}',${i},'st',this.value);renderNet('${type}')" aria-label="Estado">
         ${NET_ST.map(s=>`<option value="${s}" ${c.st===s?'selected':''}>${s||'Estado...'}</option>`).join('')}
       </select>
-      <button class="net-del" onclick="delContact('${type}',${i})" aria-label="Eliminar contacto">×</button>
+      <button class="net-del" onclick="askDel('este contacto',()=>delContact('${type}',${i}))" aria-label="Eliminar contacto">×</button>
       <button class="net-msg-btn" onclick="openMsgModal('${type}',${i})" aria-label="Generar mensaje">📩</button>
     </div>
   `).join('');
@@ -1701,7 +1701,7 @@ function renderApps() {
       <td><input class="ti" type="date" value="${esc(app.paf||'')}" style="width:106px;${due?'color:var(--red);font-weight:700':''}" onchange="updApp(${ri},'paf',this.value);renderApps()"></td>
       <td style="text-align:center"><input type="checkbox" title="¿Tengo un contacto interno?" ${app.ci?'checked':''} onchange="updApp(${ri},'ci',this.checked)"></td>
       <td><input class="ti" placeholder="Notas..." value="${esc(app.notas||'')}" oninput="updApp(${ri},'notas',this.value)" style="min-width:90px"></td>
-      <td><button style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;transition:color .13s" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'" onclick="delApp(${ri})" aria-label="Eliminar postulación">×</button></td>
+      <td><button style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;transition:color .13s" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'" onclick="askDel('esta postulación del tracker',()=>delApp(${ri}))" aria-label="Eliminar postulación">×</button></td>
     </tr>`;
   }).join('');
   updateFunnel(); updateKPIs(); renderFU(); renderSrc(); buildActChart();
@@ -1720,6 +1720,23 @@ function updApp(i,field,val) {
     save(); updateKPIs(); updateFunnel();
     if(field==='pa'||field==='paf'||field==='status') renderFU();
   }
+}
+
+// Confirmación genérica antes de borrar (evita borrados accidentales)
+let _delCb = null;
+function askDel(what, cb) {
+  _delCb = cb;
+  openModal('¿Querés borrar esta información?',
+    `<p style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:20px">Se va a eliminar ${what}. Esta acción no se puede deshacer.</p>
+     <div style="display:flex;gap:10px;justify-content:flex-end">
+       <button class="btn btn-sec" onclick="_delCb=null;closeMod()">Cancelar</button>
+       <button class="btn btn-danger" onclick="runDel()">Sí, borrar</button>
+     </div>`);
+}
+function runDel() {
+  const cb = _delCb; _delCb = null;
+  closeMod();
+  if(cb) cb();
 }
 
 function delApp(i) {
@@ -1853,7 +1870,7 @@ function renderEvals() {
     let html = `<div class="ev-card" id="ev${ev.id}">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;flex-wrap:wrap">
         <input class="ev-title-inp" placeholder="Nombre de la evaluación (ej: Entrevista en Globant)" value="${esc(ev.title||'')}" oninput="updEv(${ei},'title',this.value)">
-        <button class="btn btn-danger btn-xs" onclick="delEv(${ei})">× Eliminar</button>
+        <button class="btn btn-danger btn-xs" onclick="askDel('esta evaluación',()=>delEv(${ei}))">× Eliminar</button>
       </div>
       <div style="margin-bottom:12px">
         <select class="sel" style="max-width:320px;font-size:12px;padding:6px 10px" onchange="updEv(${ei},'app',this.value)">
@@ -1927,7 +1944,7 @@ function renderStars() {
     <div style="background:#fff;border:1px solid var(--bdr);border-radius:var(--r);padding:16px;margin-bottom:12px;box-shadow:var(--sh)">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
         <span style="font-size:10px;font-weight:700;color:var(--p);text-transform:uppercase;letter-spacing:1px">Pregunta STAR ${i+1}</span>
-        <button class="btn btn-danger btn-xs" onclick="delStar(${i})">× Eliminar</button>
+        <button class="btn btn-danger btn-xs" onclick="askDel('esta historia STAR',()=>delStar(${i}))">× Eliminar</button>
       </div>
       <div class="fld"><input class="inp" style="font-size:12.5px" placeholder="¿Cuál es la pregunta difícil o el punto débil a trabajar?" value="${esc(st.p||'')}" oninput="updStar(${i},'p',this.value)"></div>
       <div class="fld"><label class="lbl">🏛️ Situación</label><textarea class="ta" style="min-height:60px;font-size:12.5px" placeholder="Contexto breve: ¿Dónde y cuándo pasó?" oninput="updStar(${i},'s',this.value)">${esc(st.s||'')}</textarea></div>
@@ -1973,7 +1990,7 @@ function renderPosts() {
         <input class="ti" placeholder="Pilar" value="${esc(p.p||'')}" oninput="updPost(${i},'p',this.value)">
         <select class="ts" onchange="updPost(${i},'fmt',this.value)" aria-label="Formato">${POST_FMT.map(f=>`<option ${p.fmt===f?'selected':''}>${f}</option>`).join('')}</select>
         <select class="ts" onchange="updPost(${i},'st',this.value);renderPosts()" aria-label="Estado">${POST_ST.map(s=>`<option ${p.st===s?'selected':''}>${s}</option>`).join('')}</select>
-        <button class="net-del" onclick="delPost(${i})" aria-label="Eliminar idea">×</button>
+        <button class="net-del" onclick="askDel('esta idea',()=>delPost(${i}))" aria-label="Eliminar idea">×</button>
       </div>
     `).join('');
   }
