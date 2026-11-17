@@ -544,8 +544,23 @@ textarea{resize:vertical}
 .ss-n{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--sc)}
 .ss-st{font-size:10.5px;font-weight:700;color:var(--muted)}
 .ss-st.ok{color:var(--p)}
+.ss-q{font-size:12px;color:var(--txt2);line-height:1.55;margin:0 0 8px}
+.ss-ex{margin:0 0 10px;border:1px dashed var(--bdr2);border-radius:8px;background:var(--surf2)}
+.ss-ex summary{cursor:pointer;font-size:12px;font-weight:700;color:var(--p);padding:7px 10px}
+.ss-ex-b{font-size:12px;line-height:1.6;color:var(--txt2);padding:0 10px 10px}
+.ss-ex-n{font-size:10.5px;color:var(--muted);margin-top:6px;font-style:italic}
+.ss-clock{font-size:11px;font-weight:600;color:var(--muted);margin-top:8px;min-height:15px}
+.ss-pol{margin-top:8px}.ss-pol:disabled{opacity:.45;cursor:not-allowed}
+.pz-grid{display:grid;gap:10px;margin-bottom:12px}.pz-row .lbl{margin:0 0 4px}
+.pz-ex{margin:0 0 12px;border:1px dashed var(--bdr2);border-radius:8px;background:var(--surf2)}.pz-ex summary{cursor:pointer;font-size:12px;font-weight:700;color:var(--p);padding:7px 10px}.pz-ex div{font-size:12.5px;line-height:1.7;color:var(--txt2);padding:0 10px 10px}
+.pz-draft{background:#fff;border:1px solid var(--bdr);border-left:5px solid var(--p);border-radius:var(--r);padding:12px 14px;margin:12px 0 18px}
+.pz-draft p{font-size:13.5px;line-height:1.7;color:var(--txt);margin:6px 0}
+.pz-cnt{font-size:11px;font-weight:600;color:var(--muted)}
+.li-url-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.li-url-row .inp{flex:1;min-width:220px}.li-url-msg{font-size:12px;margin-top:8px;min-height:16px;color:var(--muted)}.li-url-msg.ok{color:#1a7a4c;font-weight:600}.li-url-msg.warn{color:#b3411f}
 .brand-links{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
 .bl-card{background:#fff;border:1px solid var(--bdr);border-left:5px solid var(--bc);border-radius:var(--r);padding:14px 16px;display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;box-shadow:var(--sh)}
+.bl-card .btn{flex-shrink:0;white-space:nowrap}
+@media(max-width:560px){.bl-card{flex-wrap:wrap!important}}
 .bl-ttl{font-size:14px;font-weight:800;color:var(--txt)}
 .bl-sub{font-size:12px;color:var(--muted);line-height:1.5;margin-top:2px;max-width:300px}
 @media(max-width:800px){.brand-links{grid-template-columns:1fr}}
@@ -783,9 +798,16 @@ textarea{resize:vertical}
   <!-- 5 · ELEVATOR PITCH -->
   <div class="card" id="adn-pitch">
     <div class="card-hdr"><div class="card-ttl"><div class="dot"></div>Mi Elevator Pitch</div></div>
-    <p class="adn-help">Son 30 segundos para decir quién sos, qué hacés y qué buscás. Primero escribí dos versiones y después combinalas en una.</p>
+    <p class="adn-help">Son 30 segundos para decir quién sos, qué hacés y qué buscás. Primero armá las cinco piezas, con eso se genera un borrador, y después trabajá las tres versiones.</p>
     <div class="pitch-ctx" id="pitchCtx"></div>
-    <div class="pitch-steps"><span>1 Quién soy</span><span>2 Qué hago</span><span>3 Para quién</span><span>4 Qué me distingue</span><span>5 Qué busco</span></div>
+    <div class="pz-grid" id="pzGrid"></div>
+    <details class="pz-ex"><summary>Ver un pitch de ejemplo</summary><div>Soy Ana, analista de datos con seis años en retail. Convierto datos de ventas en decisiones que ordenan el stock y bajan costos. Trabajo con equipos comerciales que necesitan entender qué se vende y por qué. Lo que me distingue es que explico los números sin tecnicismos: mi último tablero redujo 18% el sobrestock. Hoy busco un rol de análisis comercial en consumo masivo, donde pueda crecer hacia la gestión de equipos.<br><i style="font-size:11px;color:var(--muted)">Ejemplo inventado para mostrar el tono y el largo.</i></div></details>
+    <div class="pz-draft" id="pzDraft" style="display:none">
+      <div class="pitch-tag">Tu borrador con las cinco piezas</div>
+      <p id="pzTxt"></p>
+      <div class="pz-cnt" id="pzCnt"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn btn-p btn-sm" onclick="pzUse()" id="pzUseBtn">Usar como Versión 1</button></div>
+    </div>
     <div class="pitch-pair">
       <div class="pitch-card" style="--pc:#d4522a">
         <div class="pitch-tag">Versión 1</div><div class="pitch-ttl">Sin miedo</div><div class="pitch-sub">Auténtica y directa, sin filtros.</div>
@@ -826,6 +848,15 @@ textarea{resize:vertical}
     <div class="card" id="cv-list"></div>
   </div>
   <div class="tc" id="t-li">
+    <div class="card" id="liUrlCard">
+      <div class="card-ttl" style="margin-bottom:4px"><div class="dot"></div>La URL de tu perfil de LinkedIn</div>
+      <div class="adn-help" style="margin:0 0 10px">Cuando tu perfil esté optimizado, pegá acá el link. Queda guardado y se muestra como acceso rápido en Marca Personal.</div>
+      <div class="li-url-row">
+        <input class="inp" id="liUrlInp" type="url" inputmode="url" autocomplete="off" placeholder="https://www.linkedin.com/in/tu-nombre" oninput="onLiUrl(false)" onchange="onLiUrl(true)">
+        <a class="btn btn-p btn-sm" id="liUrlGo" href="#" target="_blank" rel="noopener" style="display:none">Abrir mi perfil ↗</a>
+      </div>
+      <div class="li-url-msg" id="liUrlMsg"></div>
+    </div>
     <div class="prog-wrap"><div class="prog-row"><span>Progreso LinkedIn</span><span id="li-p">0%</span></div><div class="prog-bar"><div class="prog-fill" id="li-f" style="width:0%"></div></div></div>
     <div class="card" id="li-list"></div>
   </div>
@@ -996,9 +1027,15 @@ textarea{resize:vertical}
       <div class="card-ttl" style="margin-bottom:8px"><div class="dot"></div>¿Qué es el Método STAR?</div>
       <p style="font-size:13px;line-height:1.8;color:var(--txt2)">Las entrevistas por competencias evalúan <strong>cómo actuaste en situaciones reales</strong>, no solo qué sabés en teoría. El método STAR te da estructura para responder con impacto:<br><br>
       🏛️ <strong>S — Situación:</strong> contexto breve de la situación. &nbsp;|&nbsp; 📋 <strong>T — Tarea:</strong> qué te correspondía resolver. &nbsp;|&nbsp; ⚡ <strong>A — Acción:</strong> qué hiciste concretamente. &nbsp;|&nbsp; 🎯 <strong>R — Resultado:</strong> impacto concreto y medible.<br><br>
-      <em>Consejo: preparate 3-4 historias STAR que reflejen liderazgo, resolución de problemas, trabajo en equipo y adaptabilidad.</em></p>
+      <em>Consejo: con tres historias bien armadas (liderazgo, resolución de problemas y trabajo en equipo) podés responder casi cualquier pregunta por competencias.</em></p>
     </div>
-    <div class="card star-link" id="starLinkCard" style="margin-bottom:14px"></div>
+    <div class="card" id="starIdeasCard" style="margin-bottom:18px">
+      <div class="pitch-steps"><span>1 Juntá la materia prima</span><span>2 Elegí tres momentos</span><span>3 Armalos en S-T-A-R</span><span>4 Probalos en voz alta</span></div>
+      <div class="card-ttl" style="margin-bottom:4px"><div class="dot"></div>Primero, la materia prima</div>
+      <p class="adn-help" style="margin:0 0 10px">Antes de escribir una historia completa, anotá cuatro o cinco momentos de tu trabajo de los que te sientas orgullo. Alcanzan unas pocas palabras por cada uno: un proyecto que rescataste, un conflicto que destrabaste, algo que lograste con pocos recursos, un error del que aprendiste.</p>
+      <textarea class="ta" id="starIdeas" rows="4" placeholder="Ej. 1) Migración del sistema de pedidos. 2) Cliente que estaba por irse. 3) Mediación entre ventas y operaciones. 4) Primer mes cubriendo a mi jefatura." oninput="ssIdeas(this.value)"></textarea>
+      <p class="adn-help" style="margin:10px 0 0">Después elegí tres: una donde lideraste, una donde resolviste un problema y una donde trabajaste en equipo. Abajo tenés una pregunta guía y un ejemplo de cada una.</p>
+    </div>
     <div class="card-hdr" style="margin-bottom:10px">
       <div class="card-ttl"><div class="dot"></div>Mis Historias STAR</div>
       <span class="adn-note" id="ssCnt"></span>
@@ -1582,6 +1619,7 @@ function loadS() {
   S.brand.aud = S.brand.aud||''; S.brand.prop = S.brand.prop||'';
   S.brand.pil = S.brand.pil||''; S.brand.freq = S.brand.freq||'';
   S.brand.posts = S.brand.posts||[];
+  S.brand.liUrl = S.brand.liUrl||'';
   S.lastBackup = S.lastBackup||0;
   S.bkSnooze = S.bkSnooze||0;
   S.diag = S.diag||{ step:null, scores:{}, result:null };
@@ -2498,6 +2536,7 @@ function tokMap() {
     '{{PITCH2}}': a.a_p2,
     '{{PITCH3}}': a.a_p3,
     '{{PILARES}}': b.pil,
+    '{{LINKEDIN_URL}}': liUrlValid(b.liUrl) ? b.liUrl : '',
     '{{AUDIENCIA}}': b.aud,
     '{{PROPUESTA}}': b.prop,
     '{{GENERO}}': GENDER_TXT[S.gender]||'',
@@ -2656,7 +2695,7 @@ function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'
 // ─── MI PERFIL: TARJETAS DE HERRAMIENTAS + BITÁCORA DE ENCUENTROS ───────────
 // Completá TOOL_LINKS con los links publicados de cada herramienta (Netlify).
 // Si un link queda vacío, la tarjeta simplemente no muestra "Abrir herramienta".
-const TOOL_LINKS = { mapa360:'', foda:'', plan12:'', capitulo:'', anclas:'', mbti:'', conductual:'', estilos:'', ie:'', valores:'', ikigai:'', prioridades:'', linkedin:'' };
+const TOOL_LINKS = { mapa360:'', foda:'', plan12:'', capitulo:'', anclas:'', mbti:'', conductual:'', estilos:'', ie:'', valores:'', ikigai:'', prioridades:'', linkedin:'https://lavozdetuempleabilidad.netlify.app/' };
 const TOOL_GROUPS = {
   base:{ name:'', color:'#3b35a8' },
   auto:{ name:'Autoconocimiento (según tu proceso)', color:'#d4522a' },
@@ -2869,9 +2908,8 @@ function wrapModHeroes() {
 }
 
 // ─── v2: ENLACES EXTERNOS (completá las URLs cuando las tengas) ──────────────
-// STAR: link a la herramienta externa del Método STAR (se carga después).
-// linkedinVoz y linkedinUrl: links a "Tu voz en LinkedIn" y a "URL de tu LinkedIn".
-const EXT_LINKS = { star:'', linkedinVoz:'', linkedinUrl:'' };
+// linkedinVoz: "Tu voz en LinkedIn" (publicada). El Método STAR y el elevator pitch se trabajan dentro del tablero.
+const EXT_LINKS = { linkedinVoz:'https://lavozdetuempleabilidad.netlify.app/' };
 function extBtn(key, label, cls) {
   const u = EXT_LINKS[key] || '';
   return u
@@ -2879,12 +2917,57 @@ function extBtn(key, label, cls) {
     : `<span class="btn btn-sm ext-off" title="El link se va a sumar pronto">${esc(label)} · próximamente</span>`;
 }
 function renderExtLinks() {
-  const sl = document.getElementById('starLinkCard');
-  if(sl) sl.innerHTML = `<div class="ext-row"><div><div class="card-ttl" style="margin-bottom:4px"><div class="dot"></div>Herramienta del Método STAR</div><div class="adn-help" style="margin:0">Armá tus respuestas paso a paso con la herramienta y después guardá acá tus historias.</div></div><div>${extBtn('star','Abrir la herramienta','btn-p')}</div></div>`;
   const bl = document.getElementById('brandLinks');
   if(bl) bl.innerHTML = `
-    <div class="bl-card" style="--bc:#3b35a8"><div><div class="bl-ttl">Tu voz en LinkedIn</div><div class="bl-sub">Definí tu voz y armá los prompts para escribir con tu estilo.</div></div>${extBtn('linkedinVoz','Abrir herramienta','btn-p')}</div>
-    <div class="bl-card" style="--bc:#d4522a"><div><div class="bl-ttl">URL de tu LinkedIn</div><div class="bl-sub">Acceso rápido a la herramienta para tu URL personalizada.</div></div>${extBtn('linkedinUrl','Abrir herramienta','btn-out')}</div>`;
+    <div class="bl-card" style="--bc:#3b35a8;flex-wrap:nowrap"><div style="min-width:0"><div class="bl-ttl">Tu voz en LinkedIn</div><div class="bl-sub">Definí tu voz y armá los prompts para escribir con tu estilo.</div></div>${extBtn('linkedinVoz','Abrir herramienta','btn-p')}</div>
+    ${liUrlCardHTML()}`;
+  renderLiUrlField();
+}
+
+// ─── URL del perfil de LinkedIn (se carga en Revisión de LinkedIn) ───────────
+function liUrlNorm(v) {
+  v = (v||'').trim(); if(!v) return '';
+  if(!/^https?:\/\//i.test(v)) v = 'https://' + v.replace(/^\/+/, '');
+  return v;
+}
+function liUrlValid(v) { return /^https?:\/\/([a-z0-9-]+\.)?linkedin\.com\/in\/[^\s\/?#]+/i.test(v||''); }
+function liUrlCardHTML() {
+  const u = (S.brand && S.brand.liUrl) || '';
+  const ok = liUrlValid(u);
+  const sub = ok ? esc(u.replace(/^https?:\/\/(www\.)?/i,'')) : 'Cuando tu perfil esté optimizado, cargá la URL en la Revisión de LinkedIn.';
+  const btn = ok
+    ? `<a class="btn btn-out btn-sm" href="${esc(u)}" target="_blank" rel="noopener">Abrir mi perfil ↗</a>`
+    : `<button class="btn btn-out btn-sm" onclick="goLiUrl()">Cargar mi URL</button>`;
+  return `<div class="bl-card" style="--bc:#d4522a;flex-wrap:nowrap"><div style="min-width:0"><div class="bl-ttl">URL de tu LinkedIn</div><div class="bl-sub" style="word-break:break-all">${sub}</div></div>${btn}</div>`;
+}
+function goLiUrl() {
+  const b = document.querySelector('#m2 .tabs .tab:nth-child(2)');
+  const nb = document.querySelector('.nb[data-m="2"]');
+  goMod(2, nb);
+  if(b) swTab('aud','t-li',b);
+  setTimeout(()=>{ const i = document.getElementById('liUrlInp'); if(i) i.focus(); }, 200);
+}
+function renderLiUrlField() {
+  const i = document.getElementById('liUrlInp'); if(!i) return;
+  if(document.activeElement !== i) i.value = (S.brand && S.brand.liUrl) || '';
+  paintLiUrl();
+}
+function paintLiUrl() {
+  const u = (S.brand && S.brand.liUrl) || '', msg = document.getElementById('liUrlMsg'), go = document.getElementById('liUrlGo');
+  if(!msg || !go) return;
+  const nu = liUrlNorm(u), ok = liUrlValid(nu);
+  go.style.display = ok ? '' : 'none'; if(ok) go.href = nu;
+  if(!u) { msg.className='li-url-msg'; msg.textContent=''; }
+  else if(ok) { msg.className='li-url-msg ok'; msg.textContent='Listo, tu URL quedó guardada.'; }
+  else { msg.className='li-url-msg warn'; msg.textContent='Revisá el formato: tiene que verse como linkedin.com/in/tu-nombre.'; }
+}
+function onLiUrl(commit) {
+  const i = document.getElementById('liUrlInp'); if(!i) return;
+  S.brand = S.brand||{};
+  let v = i.value;
+  if(commit) { v = liUrlNorm(v); i.value = v; }
+  S.brand.liUrl = v; save(); paintLiUrl();
+  if(commit) renderExtLinks();
 }
 
 // ─── v2: ENERGÍA (espectro de 5 niveles) ─────────────────────────────────────
@@ -3037,6 +3120,41 @@ function pitchRefresh() {
     ctx.innerHTML = '<span class="pc-lbl">Tu pitch tiene que sonar a:</span>' + chip('Objetivo', obj?(obj.length>60?obj.slice(0,60)+'…':obj):'', 'adn-obj') + chip('Roles', rl.slice(0,3).join(', '), 'adn-sec') + chip('Sectores', sc.slice(0,3).join(', '), 'adn-sec');
   }
 }
+// ─── Elevator pitch: cinco piezas ───────────────────────────────────────────
+const PZ = [
+  { k:'Quién soy',          h:'Tu nombre, tu rol o profesión y cuánta experiencia tenés.', ph:'Soy ..., [profesión o rol] con ... años en [sector].' },
+  { k:'Qué hago',           h:'El problema que resolvés o lo que lográs, en verbos concretos.', ph:'Me dedico a ... / Ayudo a ... a lograr ...' },
+  { k:'Para quién',         h:'Con qué tipo de equipos, empresas o personas trabajás.', ph:'Trabajo con equipos de ... / empresas que necesitan ...' },
+  { k:'Qué me distingue',   h:'Un logro con número o una forma de trabajar que te diferencie.', ph:'Lo que me distingue es ... (por ejemplo, un resultado concreto).' },
+  { k:'Qué busco',          h:'El rol o el tipo de oportunidad que querés ahora.', ph:'Hoy busco ... donde pueda ...' },
+];
+function pzData() { S.pitchPz = Array.isArray(S.pitchPz) ? S.pitchPz : ['','','','','']; while(S.pitchPz.length<5) S.pitchPz.push(''); return S.pitchPz; }
+function pzDraftText() {
+  const t = pzData().map(x => (x||'').trim().replace(/[.\s]+$/,'')).filter(Boolean).map(x => x.charAt(0).toUpperCase()+x.slice(1)).join('. ');
+  return t ? t+'.' : '';
+}
+function pzRender() {
+  const g = document.getElementById('pzGrid'); if(!g) return;
+  const d = pzData();
+  g.innerHTML = PZ.map((p,i) => `<div class="pz-row"><label class="lbl">${i+1} · ${p.k}</label><div class="adn-help" style="margin:0 0 4px">${p.h}</div><input class="inp" type="text" maxlength="220" placeholder="${esc(p.ph)}" value="${esc(d[i]||'')}" oninput="pzSet(${i},this.value)"></div>`).join('');
+  pzPaint();
+}
+function pzSet(i, v) { pzData()[i] = v; save(); pzPaint(); }
+function pzPaint() {
+  const box = document.getElementById('pzDraft'); if(!box) return;
+  const t = pzDraftText(); box.style.display = t ? '' : 'none';
+  if(!t) return;
+  document.getElementById('pzTxt').textContent = t;
+  const w = t.split(/\s+/).filter(Boolean).length, sec = Math.round(w/2.5);
+  document.getElementById('pzCnt').textContent = w+' palabras, unos '+sec+' segundos. '+(sec>40?'Para 30 segundos conviene recortar.':sec<20?'Podés sumar un dato que te distinga.':'Está en un buen largo.');
+  const p1 = document.getElementById('a_p1'); const b = document.getElementById('pzUseBtn');
+  if(b) b.textContent = (p1 && p1.value.trim()) ? 'Reemplazar mi Versión 1 por este borrador' : 'Usar como Versión 1';
+}
+function pzUse() {
+  const t = pzDraftText(); const p1 = document.getElementById('a_p1'); if(!t || !p1) return;
+  p1.value = t; saveADN(); if(typeof pitchRefresh==='function') pitchRefresh(); pzPaint();
+  p1.scrollIntoView({behavior:'smooth', block:'center'});
+}
 function adnRefresh() { renderThread(); pitchRefresh(); }
 function adnGo(id) { const el = document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth', block:'start'}); }
 function renderAdn() {
@@ -3046,7 +3164,7 @@ function renderAdn() {
   document.getElementById('a_rol').value = adnList('rol').join(', ');
   document.getElementById('sec_x_in').value = x.sec_x; document.getElementById('rol_x_in').value = x.rol_x;
   x.hitos.forEach((h,i) => { const el = document.getElementById('h_'+i); if(el) el.value = h; });
-  renderSmart(); renderPlanCards(); renderExplore(); renderCards('sec'); renderCards('rol'); adnRefresh();
+  renderSmart(); renderPlanCards(); renderExplore(); renderCards('sec'); renderCards('rol'); pzRender(); adnRefresh();
 }
 function copyPromptByTitle(title, msg) {
   const i = PROMPTS_DATA.findIndex(p => p.title===title); if(i<0) return;
@@ -3063,23 +3181,67 @@ function starStories() {
   return S.starStories;
 }
 function ssDone(st) { return !!(st.t||'').trim() && !!(st.s||'').trim() && !!(st.tk||'').trim() && !!(st.a||'').trim() && !!(st.r||'').trim(); }
+const SS_TYPES = [
+  { k:'Liderazgo', q:'Pensá en un momento en que guiaste a otras personas o tomaste una decisión difícil, aunque no tuvieras el cargo.',
+    ex:{ t:'Ordené un equipo en plena migración', s:'En mi último trabajo, el equipo de seis personas tenía que migrar el sistema de pedidos en dos meses y la mitad estaba en sus primeras semanas.', tk:'Me pidieron coordinar la migración sin dejar de atender a clientes.', a:'Armé un plan por semanas, asigné cada parte según la experiencia de cada persona y sumé una reunión de 15 minutos por la mañana para destrabar bloqueos. Hablé una por una con las personas nuevas para ver qué necesitaban.', r:'Terminamos una semana antes, sin pedidos perdidos y con 20% menos de reclamos durante el primer mes.' } },
+  { k:'Resolver un problema', q:'Pensá en algo que estaba trabado o fallando y que lograste encaminar, con pocos recursos o poco tiempo.',
+    ex:{ t:'Recuperé un cliente que se iba', s:'Un cliente que representaba el 15% de la facturación avisó que no iba a renovar por demoras en las entregas.', tk:'Tenía que entender qué fallaba y proponer una solución antes de fin de mes.', a:'Revisé tres meses de entregas y vi que la demora estaba en la etapa de aprobación. Propuse un circuito de validación en 48 horas y lo presenté al cliente en una reunión.', r:'El cliente renovó por un año y las entregas a tiempo pasaron del 70% al 95%.' } },
+  { k:'Trabajo en equipo', q:'Pensá en una situación en la que dependías de otras personas, o en la que había tensión, y lograron avanzar juntas.',
+    ex:{ t:'Alineé a dos áreas que no se hablaban', s:'Ventas y operaciones llevaban meses discutiendo por los plazos que se prometían a clientes.', tk:'Mi proyecto dependía de las dos áreas y necesitaba que trabajaran en conjunto.', a:'Organicé un taller de una hora con casos reales, armamos entre todo el equipo una tabla de plazos realistas por tipo de pedido y acordamos quién avisa a quién ante un cambio.', r:'En dos meses bajaron a la mitad las consultas urgentes y el proyecto salió en fecha.' } },
+];
+function ssWords(st) { return [st.s,st.tk,st.a,st.r].join(' ').trim().split(/\s+/).filter(Boolean).length; }
+function ssClock(st) {
+  const w = ssWords(st); if(!w) return '';
+  const sec = Math.round(w/2.2), t = sec>=60 ? Math.floor(sec/60)+' min '+(sec%60? (sec%60)+' s':'') : sec+' s';
+  const tip = sec<45 ? 'Quedó corta: sumá detalle en la Acción.' : sec>150 ? 'Quedó larga: dejá solo lo esencial.' : 'Buen largo para una entrevista.';
+  return '≈ '+t.trim()+' al decirla en voz alta. '+tip;
+}
+function ssPolishPrompt(i) {
+  const st = starStories()[i], g = (typeof GENDER_TXT!=='undefined' && GENDER_TXT[S.gender]) || 'neutra';
+  return `Actuá como especialista en selección de personal.
+Te paso una historia con el Método STAR para una entrevista. Mejorala sin inventar datos ni cifras que no estén escritas.
+
+Historia (${SS_TYPES[i].k}): ${(st.t||'').trim()}
+Situación: ${(st.s||'').trim()}
+Tarea: ${(st.tk||'').trim()}
+Acción: ${(st.a||'').trim()}
+Resultado: ${(st.r||'').trim()}
+
+Quiero que:
+1. Me devuelvas una versión para decir en voz alta, de entre 90 segundos y 2 minutos, en primera persona y con frases cortas.
+2. Marques si la Acción cuenta lo que hice yo y no solo lo que hizo el equipo.
+3. Me digas si el Resultado se puede medir mejor y qué dato me conviene buscar.
+4. Me propongas tres preguntas de seguimiento que me podrían hacer sobre esta historia.
+
+Redactá con concordancia de género ${g}.`;
+}
+function ssPolish(i) { if(!ssDone(starStories()[i])) return; pfCopy(ssPolishPrompt(i), 'Prompt copiado. Pegalo en tu IA.'); }
+function ssIdeas(v) { S.starIdeas = v; save(); }
 function renderStarStories() {
   const box = document.getElementById('starStories'); if(!box) return;
+  const ide = document.getElementById('starIdeas'); if(ide && document.activeElement!==ide) ide.value = S.starIdeas||'';
   const list = starStories();
-  box.innerHTML = list.map((st,i) => `
+  box.innerHTML = list.map((st,i) => { const ty = SS_TYPES[i], ex = ty.ex; return `
     <div class="ss-card" style="--sc:${SS_COLORS[i]}">
-      <div class="ss-hd"><span class="ss-n">Historia ${i+1}${i===2?' (opcional)':''}</span><span class="ss-st ${ssDone(st)?'ok':''}" id="ssst${i}">${ssDone(st)?'Completa':'En curso'}</span></div>
-      <input class="inp" maxlength="80" placeholder="Un título que la recuerde (ej. Rescaté un proyecto frenado)" value="${esc(st.t||'')}" oninput="ssSet(${i},'t',this.value)">
-      <label class="lbl">Situación</label><textarea class="ta" rows="2" placeholder="¿Dónde y cuándo pasó?" oninput="ssSet(${i},'s',this.value)">${esc(st.s||'')}</textarea>
-      <label class="lbl">Tarea</label><textarea class="ta" rows="2" placeholder="¿Qué te correspondía resolver?" oninput="ssSet(${i},'tk',this.value)">${esc(st.tk||'')}</textarea>
-      <label class="lbl">Acción</label><textarea class="ta" rows="3" placeholder="¿Qué hiciste vos, concretamente?" oninput="ssSet(${i},'a',this.value)">${esc(st.a||'')}</textarea>
-      <label class="lbl">Resultado</label><textarea class="ta" rows="2" placeholder="¿Qué cambió? Si podés, con números." oninput="ssSet(${i},'r',this.value)">${esc(st.r||'')}</textarea>
-    </div>`).join('');
+      <div class="ss-hd"><span class="ss-n">Historia ${i+1} · ${ty.k}${i===2?' (opcional)':''}</span><span class="ss-st ${ssDone(st)?'ok':''}" id="ssst${i}">${ssDone(st)?'Completa':'En curso'}</span></div>
+      <p class="ss-q">${ty.q}</p>
+      <details class="ss-ex"><summary>Ver un ejemplo completo</summary>
+        <div class="ss-ex-b"><b>${esc(ex.t)}</b><br><b>S.</b> ${esc(ex.s)}<br><b>T.</b> ${esc(ex.tk)}<br><b>A.</b> ${esc(ex.a)}<br><b>R.</b> ${esc(ex.r)}<div class="ss-ex-n">Ejemplo inventado para mostrar el nivel de detalle. La tuya tiene que ser real.</div></div>
+      </details>
+      <input class="inp" maxlength="80" placeholder="Un título que la recuerde (ej. ${esc(ex.t)})" value="${esc(st.t||'')}" oninput="ssSet(${i},'t',this.value)">
+      <label class="lbl">Situación</label><textarea class="ta" rows="2" placeholder="¿Dónde y cuándo pasó? Dos oraciones alcanzan." oninput="ssSet(${i},'s',this.value)">${esc(st.s||'')}</textarea>
+      <label class="lbl">Tarea</label><textarea class="ta" rows="2" placeholder="¿Qué te correspondía resolver a vos?" oninput="ssSet(${i},'tk',this.value)">${esc(st.tk||'')}</textarea>
+      <label class="lbl">Acción</label><textarea class="ta" rows="3" placeholder="¿Qué hiciste vos, concretamente? Es la parte más larga. Usá la primera persona." oninput="ssSet(${i},'a',this.value)">${esc(st.a||'')}</textarea>
+      <label class="lbl">Resultado</label><textarea class="ta" rows="2" placeholder="¿Qué cambió? Si podés, con un número o un antes y después." oninput="ssSet(${i},'r',this.value)">${esc(st.r||'')}</textarea>
+      <div class="ss-clock" id="ssck${i}">${ssClock(st)}</div>
+      <button type="button" class="btn btn-out btn-xs ss-pol" id="sspol${i}" onclick="ssPolish(${i})" ${ssDone(st)?'':'disabled'}>Copiar prompt para pulirla con IA</button>
+    </div>`; }).join('');
   ssCount();
 }
 function ssSet(i, f, v) {
   const st = starStories()[i]; st[f] = v; save();
-  const e = document.getElementById('ssst'+i); if(e) { const d = ssDone(st); e.textContent = d?'Completa':'En curso'; e.classList.toggle('ok', d); }
+  const e = document.getElementById('ssst'+i); if(e) { const d = ssDone(st); e.textContent = d?'Completa':'En curso'; e.classList.toggle('ok', d); const p = document.getElementById('sspol'+i); if(p) p.disabled = !d; }
+  const ck = document.getElementById('ssck'+i); if(ck) ck.textContent = ssClock(st);
   ssCount();
 }
 function ssCount() { const n = starStories().filter(ssDone).length, e = document.getElementById('ssCnt'); if(e) e.textContent = n+' de 3 completas'; }
